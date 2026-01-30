@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - Hospital Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            color: white;
+            padding: 30px 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .top-bar h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #51cf66;
+            margin: 10px 0;
+        }
+
+        .card-title {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .medical-info {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            border-left: 3px solid #51cf66;
+            padding-left: 15px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f5f7fa;
+        }
+
+        th {
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-scheduled {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-filled {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #51cf66;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #40c057;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+
+        .appointment-form {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <div class="sidebar-header">🩺 PATIENT</div>
+            <ul class="sidebar-nav">
+                <li><a class="nav-link active" data-section="dashboard">📊 Dashboard</a></li>
+                <li><a class="nav-link" data-section="appointments">📅 Appointments</a></li>
+                <li><a class="nav-link" data-section="prescriptions">💊 Prescriptions</a></li>
+                <li><a class="nav-link" data-section="medical-records">📋 Medical Records</a></li>
+                <li><a class="nav-link" data-section="profile">👤 My Profile</a></li>
+                <li><a href="/logout" style="color: rgba(255,255,255,0.8); margin-top: 30px;">🚪 Logout</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <h1>Patient Dashboard</h1>
+                <div>
+                    <p>Welcome, <strong id="username">Patient</strong></p>
+                    <a href="/logout" class="logout-btn">Logout</a>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section active">
+                <div class="medical-info">
+                    <div class="info-item">
+                        <div class="info-label">Blood Type</div>
+                        <div class="info-value" id="bloodType">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Age</div>
+                        <div class="info-value" id="age">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Last Visit</div>
+                        <div class="info-value" id="lastVisit">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Assigned Doctor</div>
+                        <div class="info-value" id="assignedDoctor">-</div>
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-title">Upcoming Appointments</div>
+                        <div class="card-value" id="upcomingAppointments">0</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Active Prescriptions</div>
+                        <div class="card-value" id="activePrescriptions">0</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Health Status</div>
+                        <div style="margin-top: 15px;">
+                            <p style="color: #51cf66; font-weight: 600;">✓ Good</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Section -->
+            <div id="appointments" class="section">
+                <div class="appointment-form">
+                    <h3 style="margin-bottom: 20px;">Book New Appointment</h3>
+                    <div id="bookingAlert" class="alert" style="display: none; padding: 12px; margin-bottom: 20px; border-radius: 5px;"></div>
+                    <form id="appointmentForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Select Doctor</label>
+                                <select id="doctorSelect" required>
+                                    <option value="">Loading doctors...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Preferred Date & Time</label>
+                                <input type="datetime-local" id="appointmentDateTime" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Reason for Visit</label>
+                            <textarea id="appointmentReason" placeholder="Describe your symptoms or reason..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Book Appointment</button>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>My Appointments</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Doctor</th>
+                                <th>Specialization</th>
+                                <th>Date & Time</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTable">
+                            <tr><td colspan="5" style="text-align: center; padding: 20px;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Prescriptions Section -->
+            <div id="prescriptions" class="section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>My Prescriptions</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Medication</th>
+                                <th>Dosage</th>
+                                <th>Duration</th>
+                                <th>Date Prescribed</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prescriptionsTable">
+                            <tr><td colspan="5" style="text-align: center; padding: 20px;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Medical Records Section -->
+            <div id="medical-records" class="section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Medical History</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Doctor</th>
+                                <th>Diagnosis</th>
+                                <th>Treatment</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="5" style="text-align: center; padding: 20px;">No medical records yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile" class="section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>My Profile</h2>
+                    </div>
+                    <form style="padding: 20px;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="fullName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="email" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Age</label>
+                                <input type="number" id="ageInput" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Blood Type</label>
+                                <select id="bloodTypeSelect" required>
+                                    <option value="">Select...</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" id="address" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load doctors list
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/api/doctors');
+                const data = await response.json();
+                const select = document.getElementById('doctorSelect');
+                
+                if (data.doctors.length === 0) {
+                    select.innerHTML = '<option value="">No doctors available</option>';
+                    return;
+                }
+
+                select.innerHTML = '<option value="">Choose a doctor...</option>' + 
+                    data.doctors.map(doctor => `
+                        <option value="${doctor.id}">${doctor.name} - ${doctor.specialization}</option>
+                    `).join('');
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+                document.getElementById('doctorSelect').innerHTML = '<option value="">Error loading doctors</option>';
+            }
+        }
+
+        // Load appointments
+        async function loadAppointments() {
+            try {
+                const response = await fetch('/api/patient/appointments');
+                const data = await response.json();
+                const tbody = document.getElementById('appointmentsTable');
+                
+                if (data.appointments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No appointments scheduled</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.appointments.map(apt => `
+                    <tr>
+                        <td>${apt.doctor_name}</td>
+                        <td>${apt.specialization || 'N/A'}</td>
+                        <td>${new Date(apt.date).toLocaleString()}</td>
+                        <td>${apt.reason || 'N/A'}</td>
+                        <td><span class="badge badge-${apt.status.toLowerCase()}">${apt.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+            }
+        }
+
+        // Load prescriptions
+        async function loadPrescriptions() {
+            try {
+                const response = await fetch('/api/patient/prescriptions');
+                const data = await response.json();
+                const tbody = document.getElementById('prescriptionsTable');
+                
+                if (data.prescriptions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No prescriptions</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.prescriptions.map(p => `
+                    <tr>
+                        <td>${p.medication}</td>
+                        <td>${p.dosage || 'N/A'}</td>
+                        <td>${p.duration || 'N/A'}</td>
+                        <td>${new Date(p.created_at).toLocaleDateString()}</td>
+                        <td><span class="badge badge-${p.status}">${p.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading prescriptions:', error);
+            }
+        }
+
+        // Load profile
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/user/profile');
+                const data = await response.json();
+                document.getElementById('username').textContent = data.username;
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Book appointment
+        document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const doctorId = document.getElementById('doctorSelect').value;
+            const dateTime = document.getElementById('appointmentDateTime').value;
+            const reason = document.getElementById('appointmentReason').value;
+            const alert = document.getElementById('bookingAlert');
+
+            if (!doctorId) {
+                alert.style.display = 'block';
+                alert.style.background = '#fee';
+                alert.style.color = '#c33';
+                alert.style.border = '1px solid #fcc';
+                alert.textContent = 'Please select a doctor';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/patient/book-appointment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        doctor_id: doctorId,
+                        appointment_date: new Date(dateTime).toISOString(),
+                        reason: reason
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert.style.display = 'block';
+                    alert.style.background = '#efe';
+                    alert.style.color = '#3c3';
+                    alert.style.border = '1px solid #cfc';
+                    alert.textContent = '✓ Appointment booked successfully!';
+                    document.getElementById('appointmentForm').reset();
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                        loadAppointments();
+                    }, 2000);
+                } else {
+                    alert.style.display = 'block';
+                    alert.style.background = '#fee';
+                    alert.style.color = '#c33';
+                    alert.style.border = '1px solid #fcc';
+                    alert.textContent = '✗ Error: ' + (data.error || data.message || 'Failed to book appointment');
+                }
+            } catch (error) {
+                alert.style.display = 'block';
+                alert.style.background = '#fee';
+                alert.style.color = '#c33';
+                alert.style.border = '1px solid #fcc';
+                alert.textContent = '✗ Error: ' + error.message;
+                console.error('Error booking appointment:', error);
+            }
+        });
+
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.dataset.section;
+                
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                
+                document.getElementById(section).classList.add('active');
+                link.classList.add('active');
+
+                if (section === 'appointments') {
+                    loadAppointments();
+                    loadDoctors();
+                }
+                if (section === 'prescriptions') loadPrescriptions();
+            });
+        });
+
+        window.addEventListener('load', () => {
+            loadProfile();
+            loadAppointments();
+            loadPrescriptions();
+            loadDoctors();
+        });
+    </script>
+</body>
+</html>
